@@ -124,7 +124,7 @@ contract BarTest is DSTest {
     // `addr` converts a private key into an address
     function testSignAndAddr() public {
         // `addr` computes the address from a private key
-        address vm_addr = vm.addr(1);
+        address vmAddr = vm.addr(1);
         bytes32 hash = keccak256("hi there!");
 
         // internally, `forge` signs the hash for you
@@ -134,7 +134,7 @@ contract BarTest is DSTest {
         address signer = ecrecover(hash, v, r, s);
 
         // and our derived address from forge matches the ecrecovered address
-        assertEq(vm_addr, signer);
+        assertEq(vmAddr, signer);
     }
 
     // `ffi` lets you call a function in the terminal
@@ -155,18 +155,18 @@ contract BarTest is DSTest {
     // `prank` lets you change the `msg.sender` of a particular low level call.
     function testPrank() public {
         // we the msg.sender of the new call to be address(1337)
-        address new_sender = address(1337);
+        address newSender = address(1337);
         bytes4 sig = bar.checkSender.selector;
         bytes memory calld = abi.encodePacked(sig);
 
         // as of now, prank is treated like a low level call
         // this may change in the future to work more like `expectRevert` (an upcoming cheatcode)
-        (bool success, bytes memory ret) = vm.prank(new_sender, address(bar), calld);
+        (bool success, bytes memory ret) = vm.prank(newSender, address(bar), calld);
         assertTrue(success);
 
         // we can decode the return data & check the returned sender of the call
         address barSender = abi.decode(ret, (address));
-        assertEq(barSender, new_sender);
+        assertEq(barSender, newSender);
     }
 
     // `deal` lets you set the balance of an address *without* performing a transfer
@@ -189,23 +189,23 @@ contract BarTest is DSTest {
         vm.etch(rewriteCode, newCode);
 
         // call a helper function to get the code
-        bytes memory n_code = getCode(rewriteCode);
-        assertEq(string(newCode), string(n_code));
+        bytes memory nCode = getCode(rewriteCode);
+        assertEq(string(newCode), string(nCode));
     }
 
-    function getCode(address who) internal returns (bytes memory o_code) {
+    function getCode(address who) internal returns (bytes memory oCode) {
         assembly {
             // retrieve the size of the code, this needs assembly
             let size := extcodesize(who)
             // allocate output byte array - this could also be done without assembly
-            // by using o_code = new bytes(size)
-            o_code := mload(0x40)
+            // by using oCode = new bytes(size)
+            oCode := mload(0x40)
             // new "memory end" including padding
-            mstore(0x40, add(o_code, and(add(add(size, 0x20), 0x1f), not(0x1f))))
+            mstore(0x40, add(oCode, and(add(add(size, 0x20), 0x1f), not(0x1f))))
             // store length in memory
-            mstore(o_code, size)
+            mstore(oCode, size)
             // actually retrieve the code, this needs assembly
-            extcodecopy(who, add(o_code, 0x20), 0, size)
+            extcodecopy(who, add(oCode, 0x20), 0, size)
         }
     }
 }
