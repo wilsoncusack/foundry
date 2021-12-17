@@ -153,6 +153,8 @@ contract MyTest {
     }
 ```
 
+A more complete walkthrough of all cheatcodes can be found [here](../CheatcodeTutorial.md).
+
 ## Future Features
 
 ### Dapptools feature parity

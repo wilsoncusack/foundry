@@ -1,4 +1,6 @@
 # Cheatcode Tutorial
+Cheatcodes give you more power and flexibility when writing your tests. They unlock the entire blockchain's state and transaction context for you, as well as empowering you
+with things like deriving an address from a private key.
 
 Below is an example test contract. Each test function would be ran upon calling `forge test`. Look through each test and the associated comments to see how each might be useful to you.
 
