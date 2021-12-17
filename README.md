@@ -47,6 +47,7 @@ the [CLI README](./cli/README.md).
 1. Portable (5-10MB) & easy to install statically linked binary without
    requiring Nix or any other package manager
 1. Abstracted over EVM implementations (currently supported: Sputnik, EvmOdin)
+1. "Cheatcodes" for more control, flexibility, and power when writing tests. [Example](./CheatcodeTutorial.md)
 
 ### How Fast?
 
