@@ -1,5 +1,7 @@
 //! Implementations of [`Utils`](crate::Group::Utils) cheatcodes.
 
+use std::str::FromStr;
+
 use crate::{Cheatcode, Cheatcodes, CheatsCtxt, DatabaseExt, Result, Vm::*};
 use alloy_primitives::{keccak256, B256, U256};
 use alloy_sol_types::SolValue;
@@ -17,6 +19,7 @@ use ethers_signers::{
 };
 use foundry_common::types::{ToAlloy, ToEthers};
 use foundry_evm_core::constants::DEFAULT_CREATE2_DEPLOYER;
+use p256::ecdsa::{signature::Signer as P256Signer, Signature, SigningKey as P256SigningKey};
 
 /// The BIP32 default derivation path prefix.
 const DEFAULT_DERIVATION_PATH_PREFIX: &str = "m/44'/60'/0'/0/";
@@ -169,6 +172,25 @@ pub(super) fn sign(private_key: &U256, digest: &B256, chain_id: u64) -> Result {
     sig.s.to_big_endian(&mut s_bytes);
 
     Ok((sig.v, r_bytes, s_bytes).abi_encode())
+}
+
+pub(super) fn sign_p256(private_key: &U256, digest: &B256, _state: &mut Cheatcodes) -> Result {
+    ensure!(*private_key != U256::ZERO, "private key cannot be 0");
+    let n = U256::from_str(
+        "115792089210356248762697446949407573529996955224135760342422259061068512044369",
+    )
+    .unwrap();
+    ensure!(
+        *private_key < n,
+        format!("private key must be less than the secp256k1 curve order ({})", n),
+    );
+    let bytes = private_key.to_be_bytes();
+    let signing_key = P256SigningKey::from_bytes((&bytes).into())?;
+    let signature: Signature = signing_key.sign(digest.as_slice());
+    let r_bytes: [u8; 32] = signature.r().to_bytes().into();
+    let s_bytes: [u8; 32] = signature.s().to_bytes().into();
+
+    Ok((r_bytes, s_bytes).abi_encode())
 }
 
 pub(super) fn parse_private_key(private_key: &U256) -> Result<SigningKey> {
